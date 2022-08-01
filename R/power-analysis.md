@@ -1,7 +1,7 @@
 Power analysis with R
 ================
 Michael Jahn
-27 januari, 2021
+01 August, 2022
 
 ### Introduction
 
@@ -55,7 +55,12 @@ means of 10 and 20, and common standard deviation sd = 5, looks like
 this: (the `type` argument also takes values `one.way` and `paired`)
 
 ``` r
-pwr.t.test(d = abs(10-20)/5, sig.level = 0.05, power = 0.8, type = "two.sample")
+pwr.t.test(
+  d = abs(10 - 20) / 5,
+  sig.level = 0.05,
+  power = 0.8,
+  type = "two.sample"
+)
 ```
 
     ## 
@@ -86,24 +91,30 @@ df_power <- tibble(
 
 # add power calculation two-sided t-test
 df_power <- df_power %>%
-    mutate(
-      n_samples_t_test_0.05 = sapply(effect_size, function(x) 
-        pwr.t.test(d = x, sig.level = 0.05, power = 0.8, type = "two.sample")$n),
-      n_samples_t_test_0.01 = sapply(effect_size, function(x) 
-        pwr.t.test(d = x, sig.level = 0.01, power = 0.8, type = "two.sample")$n),
-      n_samples_t_test_0.001 = sapply(effect_size, function(x) 
-        pwr.t.test(d = x, sig.level = 0.001, power = 0.8, type = "two.sample")$n)
+  mutate(
+    n_samples_t_test_0.05 = sapply(effect_size, function(x) {
+      pwr.t.test(d = x, sig.level = 0.05, power = 0.8, type = "two.sample")$n
+    }),
+    n_samples_t_test_0.01 = sapply(effect_size, function(x) {
+      pwr.t.test(d = x, sig.level = 0.01, power = 0.8, type = "two.sample")$n
+    }),
+    n_samples_t_test_0.001 = sapply(effect_size, function(x) {
+      pwr.t.test(d = x, sig.level = 0.001, power = 0.8, type = "two.sample")$n
+    })
   )
 
 # rearrange table to long format (all n values in 1 column)
-df_power <- df_power %>% 
-  pivot_longer(cols = starts_with("n_samples"), values_to = "n_samples", names_to = "alpha") %>%
+df_power <- df_power %>%
+  pivot_longer(
+    cols = starts_with("n_samples"),
+    values_to = "n_samples", names_to = "alpha"
+  ) %>%
   mutate(alpha = as.numeric(str_extract(alpha, "0.[0-9]+")))
 
 head(df_power)
 ```
 
-    ## # A tibble: 6 x 4
+    ## # A tibble: 6 × 4
     ##   power effect_size alpha n_samples
     ##   <dbl>       <dbl> <dbl>     <dbl>
     ## 1   0.8        0.05 0.05      6280.
@@ -124,15 +135,19 @@ df_power %>%
     groups = alpha,
     par.settings = custom.colorblind(), as.table = TRUE,
     main = "estimation of # replicates from effect size and significance level",
-    xlab = "effect size (difference in means / stdev)", ylab = "n samples (replicates)",
+    xlab = "effect size (difference in means / stdev)",
+    ylab = "n samples (replicates)",
     ylim = c(0, 20), xlim = c(0, 5), type = "l", lwd = 2,
     panel = function(x, y, ...) {
       panel.grid(h = -1, v = -1, col = grey(0.6))
       panel.abline(h = 1:19, lwd = 1, lty = 2, col = grey(0.8))
       panel.abline(v = c(1:5), lwd = 1, lty = 2, col = grey(0.8))
       panel.xyplot(x, y, ...)
-      panel.text(x = rep(2:4, each = 3), y = 0.7+y[x %in% c(2,3,4)],
-        labels = round(y[x %in% c(2,3,4)]), col = c("#E6AB02", "#66A61E", "#E7298A"))
+      panel.text(
+        x = rep(2:4, each = 3), y = 0.7 + y[x %in% c(2, 3, 4)],
+        labels = round(y[x %in% c(2, 3, 4)]),
+        col = c("#E6AB02", "#66A61E", "#E7298A")
+      )
       panel.key(..., corner = c(0.95, 0.95), points = FALSE, lines = TRUE)
     }
   )
